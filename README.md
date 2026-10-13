@@ -19,3 +19,7 @@ Smallest pile to mark (2 to 9), number on every pile or only the best, spell ico
 The icon is the burst or barrage spell you have on autocast, or Ice Barrage when none is. Only monsters are counted and marked, never players.
 
 In the Smoke Devil Dungeon three tiles are marked around the bones west of the cannon spot ("Group N", "Group W", "Group S"): with the cannon in the middle of the room, run from one to another to pile the smoke devils up beside the bones (OSRS Wiki, Smoke devil/Strategies, "Grouping"). Can be turned off.
+
+## Bug or suggestion
+
+Click "Bug or suggestion" in the plugin's settings: it opens a form in your browser where you write what is wrong or what you would like. The plugin itself sends nothing. You can also open an issue on this repository.
