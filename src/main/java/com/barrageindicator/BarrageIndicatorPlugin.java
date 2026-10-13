@@ -192,7 +192,14 @@ public class BarrageIndicatorPlugin extends Plugin
 			return Collections.emptyList();
 		}
 
-		int[] hits = PileCalc.hits(spots);
+		// scenery between the target and another monster of its 3x3 area keeps the spell from reaching that one
+		net.runelite.api.WorldView view = client.getTopLevelWorldView();
+		int[] hits = PileCalc.hits(spots, (target, other) ->
+		{
+			net.runelite.api.coords.WorldArea from = npcs.get(target).getWorldArea();
+			net.runelite.api.coords.WorldArea to = npcs.get(other).getWorldArea();
+			return from == null || to == null || from.hasLineOfSightTo(view, to);
+		});
 		int most = 0;
 		for (int h : hits)
 		{

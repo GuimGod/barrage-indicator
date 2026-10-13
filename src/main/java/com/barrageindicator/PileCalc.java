@@ -37,17 +37,32 @@ final class PileCalc
 	{
 	}
 
+	/** Whether the monster a spell is cast on has line of sight to another one, by their positions in the list. */
+	interface Sight
+	{
+		boolean sees(int target, int other);
+	}
+
 	/** For each monster, how many a cast on it hits (itself included), in the order given. */
 	static int[] hits(List<Spot> spots)
+	{
+		return hits(spots, (target, other) -> true);
+	}
+
+	/**
+	 * The same, leaving out the monsters the target has no line of sight to: the spell spreads from the monster
+	 * it is cast on, and scenery between that monster and another one in the area keeps the other from being hit.
+	 */
+	static int[] hits(List<Spot> spots, Sight sight)
 	{
 		int[] hits = new int[spots.size()];
 		for (int i = 0; i < hits.length; i++)
 		{
 			Spot target = spots.get(i);
 			int count = 0;
-			for (Spot other : spots)
+			for (int j = 0; j < hits.length; j++)
 			{
-				if (inArea(target, other))
+				if (inArea(target, spots.get(j)) && (i == j || sight.sees(i, j)))
 				{
 					count++;
 				}

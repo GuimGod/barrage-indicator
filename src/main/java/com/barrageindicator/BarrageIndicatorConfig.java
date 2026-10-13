@@ -126,6 +126,29 @@ public interface BarrageIndicatorConfig extends Config
 		return new Color(255, 0, 0, 150);
 	}
 
+	@ConfigItem(
+		keyName = "showGroupingTiles",
+		name = "Smoke devil grouping tiles",
+		description = "In the Smoke Devil Dungeon, mark the three tiles around the bones west of the cannon spot: run from one to another to pile the smoke devils up beside the bones.",
+		position = 8
+	)
+	default boolean showGroupingTiles()
+	{
+		return true;
+	}
+
+	@Alpha
+	@ConfigItem(
+		keyName = "groupingColour",
+		name = "Grouping tiles",
+		description = "Colour of the smoke devil grouping tiles.",
+		position = 8
+	)
+	default Color groupingColour()
+	{
+		return new Color(51, 153, 255);
+	}
+
 	@Alpha
 	@ConfigItem(
 		keyName = "bestColour",

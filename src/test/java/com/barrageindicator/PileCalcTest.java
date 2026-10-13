@@ -88,4 +88,18 @@ public class PileCalcTest
 		assertEquals(net.runelite.api.SpriteID.SPELL_ICE_BARRAGE, BarrageIndicatorPlugin.spellSprite(46));
 		assertEquals(net.runelite.api.SpriteID.SPELL_ICE_BARRAGE, BarrageIndicatorPlugin.spellSprite(0));
 	}
+
+	@Test
+	public void aMonsterTheTargetCannotSeeIsNotCounted()
+	{
+		List<PileCalc.Spot> spots = new ArrayList<>();
+		spots.add(at(10, 10));
+		spots.add(at(11, 10));
+		spots.add(at(9, 10));
+		// the middle one sees both; the two at the ends have something between them
+		int[] hits = PileCalc.hits(spots, (target, other) -> !(target == 1 && other == 2) && !(target == 2 && other == 1));
+		assertEquals(3, hits[0]);
+		assertEquals(2, hits[1]);
+		assertEquals(2, hits[2]);
+	}
 }

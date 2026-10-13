@@ -49,6 +49,52 @@ class BarrageIndicatorOverlay extends Overlay
 		setPriority(Overlay.PRIORITY_HIGH);
 	}
 
+	/** The Smoke Devil Dungeon, and the tiles to group the smoke devils from: north, west and south of the bones. */
+	private static final int SMOKE_DEVIL_DUNGEON = 9619;
+	private static final int[][] GROUPING_TILES = {{2393, 9445}, {2392, 9443}, {2393, 9441}};
+	private static final String[] GROUPING_LABELS = {"Group N", "Group W", "Group S"};
+
+	/** Outlines the grouping tiles when the player is in the Smoke Devil Dungeon. */
+	private void markGroupingTiles(Graphics2D graphics)
+	{
+		net.runelite.api.Player me = client.getLocalPlayer();
+		if (me == null)
+		{
+			return;
+		}
+		net.runelite.api.WorldView view = me.getWorldView();
+		net.runelite.api.coords.WorldPoint here = net.runelite.api.coords.WorldPoint.fromLocalInstance(client, me.getLocalLocation());
+		if (here == null || here.getRegionID() != SMOKE_DEVIL_DUNGEON)
+		{
+			return;
+		}
+		Color colour = config.groupingColour();
+		for (int i = 0; i < GROUPING_TILES.length; i++)
+		{
+			net.runelite.api.coords.WorldPoint tile = new net.runelite.api.coords.WorldPoint(
+				GROUPING_TILES[i][0], GROUPING_TILES[i][1], here.getPlane());
+			// the dungeon can be shown as an instance: the same tile may sit somewhere else in the scene
+			for (net.runelite.api.coords.WorldPoint shown : net.runelite.api.coords.WorldPoint.toLocalInstance(view, tile))
+			{
+				LocalPoint at = LocalPoint.fromWorld(view, shown);
+				if (at == null)
+				{
+					continue;
+				}
+				Polygon poly = Perspective.getCanvasTilePoly(client, at);
+				if (poly != null)
+				{
+					OverlayUtil.renderPolygon(graphics, poly, colour, new BasicStroke(2));
+				}
+				Point text = Perspective.getCanvasTextLocation(client, graphics, at, GROUPING_LABELS[i], 0);
+				if (text != null)
+				{
+					OverlayUtil.renderTextLocation(graphics, text, GROUPING_LABELS[i], colour);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Fills the monster's south-west tile, the one the spell's area is centred on, and draws the spell icon on it.
 	 */
@@ -81,6 +127,11 @@ class BarrageIndicatorOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (config.showGroupingTiles())
+		{
+			graphics.setFont(FontManager.getRunescapeSmallFont());
+			markGroupingTiles(graphics);
+		}
 		Font font = FontManager.getRunescapeBoldFont().deriveFont((float) config.fontSize());
 		graphics.setFont(font);
 		for (BarrageIndicatorPlugin.Pile pile : plugin.piles())
