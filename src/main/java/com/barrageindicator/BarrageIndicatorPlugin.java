@@ -26,7 +26,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.LinkBrowser;
 
 /**
  * Counts, for each pile of monsters, how many a burst or barrage spell cast there would hit,
@@ -243,16 +242,25 @@ public class BarrageIndicatorPlugin extends Plugin
 		return false;
 	}
 
-	/** The author's form for a bug or a suggestion, with the plugin's name filled in. The player writes and sends it in the browser. */
-	static final String REPORT_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSclvrdcVzomW3-4lj7-gnvbzmerY6qwHepApCuI7e4Q8raDyw/viewform?usp=pp_url&entry.2100394972=Barrage%20Indicator";
+	@Inject
+	private net.runelite.client.callback.ClientThread reportThread;
 
-	/** "Bug or suggestion" in the settings works as a button: each click opens the form, whichever way the box ends up. */
+	@Inject
+	private okhttp3.OkHttpClient reportHttp;
+
+	/** "Bug or suggestion" in the settings works as a button: each click opens the report window, whichever way the box ends up. */
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
 		if ("barrageindicator".equals(event.getGroup()) && "reportBug".equals(event.getKey()) && event.getNewValue() != null)
 		{
-			LinkBrowser.browse(REPORT_FORM);
+			reportThread.invokeLater(() ->
+			{
+				final NPC monster = null;
+				final String name = monster == null ? null : monster.getName();
+				final String context = ReportWindow.context(client, monster);
+				javax.swing.SwingUtilities.invokeLater(() -> ReportWindow.open(client.getCanvas(), name, context, reportHttp));
+			});
 		}
 	}
 }
