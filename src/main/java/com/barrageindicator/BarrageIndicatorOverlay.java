@@ -17,6 +17,7 @@ import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
@@ -24,7 +25,7 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 
-/** Draws the count on each pile and the spell icon on the best one. */
+/** Draws the count on each pile and the spell's or chinchompa's icon on the best one. */
 class BarrageIndicatorOverlay extends Overlay
 {
 	/** How far above the monster the mark is drawn. */
@@ -33,13 +34,15 @@ class BarrageIndicatorOverlay extends Overlay
 	private final BarrageIndicatorPlugin plugin;
 	private final BarrageIndicatorConfig config;
 	private final SpriteManager spriteManager;
+	private final ItemManager itemManager;
 	private final Client client;
 
 	@Inject
 	BarrageIndicatorOverlay(BarrageIndicatorPlugin plugin, BarrageIndicatorConfig config, SpriteManager spriteManager,
-		Client client)
+		ItemManager itemManager, Client client)
 	{
 		this.client = client;
+		this.itemManager = itemManager;
 		this.plugin = plugin;
 		this.config = config;
 		this.spriteManager = spriteManager;
@@ -47,6 +50,28 @@ class BarrageIndicatorOverlay extends Overlay
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		// over the tile marks of other plugins
 		setPriority(Overlay.PRIORITY_HIGH);
+	}
+
+	/** The icon for the best pile and the tile to cast on: the chinchompa held, or the spell on autocast. */
+	private BufferedImage icon()
+	{
+		return icon(plugin.chinchompa(), itemManager::getImage, () -> spriteManager.getSprite(plugin.spellSprite(), 0));
+	}
+
+	/**
+	 * Whether the icon goes over the pile: only on the best one, and only when the tile to cast on is not marked,
+	 * since that tile already carries the icon. The icon is drawn once.
+	 */
+	static boolean iconOverPile(boolean best, boolean showIcon, boolean showSouthWest)
+	{
+		return best && showIcon && !showSouthWest;
+	}
+
+	/** With a chinchompa held (its item id), that chinchompa's picture; otherwise the spell's. */
+	static BufferedImage icon(int chinchompa, java.util.function.IntFunction<BufferedImage> itemImage,
+		java.util.function.Supplier<BufferedImage> spellImage)
+	{
+		return chinchompa > 0 ? itemImage.apply(chinchompa) : spellImage.get();
 	}
 
 	/** The Smoke Devil Dungeon, and the tiles to group the smoke devils from: north, west and south of the bones. */
@@ -96,7 +121,7 @@ class BarrageIndicatorOverlay extends Overlay
 	}
 
 	/**
-	 * Fills the monster's south-west tile, the one the spell's area is centred on, and draws the spell icon on it.
+	 * Fills the monster's south-west tile, the one the spell's area is centred on, and draws the icon on it.
 	 */
 	private void markSouthWest(Graphics2D graphics, NPC npc)
 	{
@@ -116,7 +141,7 @@ class BarrageIndicatorOverlay extends Overlay
 		graphics.setColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue(), 255));
 		graphics.setStroke(new BasicStroke(2));
 		graphics.drawPolygon(tile);
-		BufferedImage icon = spriteManager.getSprite(plugin.spellSprite(), 0);
+		BufferedImage icon = icon();
 		Point where = icon == null ? null : Perspective.getCanvasImageLocation(client, at, icon, 0);
 		if (where != null)
 		{
@@ -158,8 +183,7 @@ class BarrageIndicatorOverlay extends Overlay
 				}
 			}
 
-			BufferedImage icon = pile.best && config.showIcon()
-				? spriteManager.getSprite(plugin.spellSprite(), 0) : null;
+			BufferedImage icon = iconOverPile(pile.best, config.showIcon(), config.showSouthWest()) ? icon() : null;
 			if (icon != null)
 			{
 				Point at = npc.getCanvasImageLocation(icon, height);

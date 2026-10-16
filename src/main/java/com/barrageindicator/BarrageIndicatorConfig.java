@@ -26,6 +26,17 @@ public interface BarrageIndicatorConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "countOthers",
+		name = "Count monsters not on task",
+		description = "With \"Only my slayer task\" on, also count the other monsters one cast would hit (like Death spawn): they take up some of the nine targets (eleven or twelve with chinchompas). The marks stay on monsters of your task. Off: only the monsters of your task are counted.",
+		position = 2
+	)
+	default boolean countOthers()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "extraNames",
 		name = "Other monsters",
 		description = "Names to count as well, separated by commas (part of the name is enough).",
@@ -37,12 +48,13 @@ public interface BarrageIndicatorConfig extends Config
 	}
 
 	@ConfigItem(
+		// the key stays "onlyAncients" so the value chosen before chinchompas counted carries over
 		keyName = "onlyAncients",
-		name = "Only on Ancient Magicks",
-		description = "Show nothing while another spellbook is active.",
+		name = "Only with Ancients or chinchompas",
+		description = "Show nothing unless the Ancient Magicks spellbook is active or you hold chinchompas.",
 		position = 3
 	)
-	default boolean onlyAncients()
+	default boolean onlyAncientsOrChins()
 	{
 		return true;
 	}
@@ -50,7 +62,7 @@ public interface BarrageIndicatorConfig extends Config
 	@ConfigItem(
 		keyName = "onlyMulti",
 		name = "Only in multicombat",
-		description = "Show nothing in single combat, where the spell hits one monster.",
+		description = "Show nothing in single combat, where the spell or chinchompa hits one monster.",
 		position = 4
 	)
 	default boolean onlyMulti()
@@ -83,8 +95,8 @@ public interface BarrageIndicatorConfig extends Config
 
 	@ConfigItem(
 		keyName = "showIcon",
-		name = "Spell icon on the best pile",
-		description = "Draw the barrage icon on the pile where one cast hits the most monsters.",
+		name = "Icon on the best pile",
+		description = "Draw the spell icon, or the chinchompa while you hold them, over the pile where one cast hits the most monsters, among those you can reach without walking (within 10 squares for spells, 9 for chinchompas or 10 on long fuse, and in sight). With none in reach, the largest pile. While \"Mark the tile to cast on\" is on, the icon is drawn on that tile instead, once.",
 		position = 7
 	)
 	default boolean showIcon()
@@ -106,7 +118,7 @@ public interface BarrageIndicatorConfig extends Config
 	@ConfigItem(
 		keyName = "showSouthWest",
 		name = "Mark the tile to cast on",
-		description = "Fill the south-west tile of the monster to cast on, the tile the spell's area is centred on, and draw the spell icon on it. With a tie, every one of the best is marked.",
+		description = "Fill the south-west tile of the monster to cast on, the tile the spell's or chinchompa's area is centred on, and draw the icon on it. With a tie, every one of the best is marked.",
 		position = 8
 	)
 	default boolean showSouthWest()
